@@ -13,6 +13,7 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using System.Net.Http.Headers;
+using System.Security.Policy;
 
 namespace DocumentEditor.Controllers
 {
@@ -43,22 +44,16 @@ namespace DocumentEditor.Controllers
         [AcceptVerbs("Post")]
         [HttpPost]
         [Route("ImportFileURL")]
-        public string ImportFileURLAsync([FromBody] FileUrlInfo param)
+        public string ImportFileURL([FromBody] FileUrlInfo param)
         {
             try
             {
                 using (WebClient client = new WebClient())
                 {
-                    client.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-                    client.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
-                    client.Headers.Add("Accept-Language", "en-US,en;q=0.5");
-                    client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
-                    client.Headers.Add("Content-Type", "application / zip, application / octet - stream");
-                    client.UseDefaultCredentials = false;
-                    client.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
-                    client.DownloadFile(param.fileUrl, @"C:\test.docx");
-                    byte[] bufferData = client.DownloadData(param.fileUrl);
-                    MemoryStream stream = new MemoryStream(bufferData);
+                    client.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
+                    client.Headers.Add(System.Net.HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134");
+                    byte[] data = client.DownloadData(param.fileUrl);
+                    MemoryStream stream = new MemoryStream(data);
                     WordDocument document = WordDocument.Load(stream, FormatType.Docx);
                     string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     document.Dispose();
@@ -66,10 +61,10 @@ namespace DocumentEditor.Controllers
                     return json;
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine(ex);                
-                return null;
+                Console.WriteLine(e);
+                return "";
             }
         }
         public class FileUrlInfo

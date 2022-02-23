@@ -39,6 +39,8 @@ function initComponentAndWireEvent(isRtl) {
 
     initializeTitleBar(true, isRtl);
     wireEventsInTitleBar();
+
+    openURL();
 }
 //Documentloader implementation ends
 
@@ -115,8 +117,8 @@ function wireEventsInTitleBar() {
             fileUpload.click();
         }
     });
-    openURLBtn.element.addEventListener('click', openURL)
-    saveURLBtn.element.addEventListener('click', saveURL)
+    //openURLBtn.element.addEventListener('click', openURL)
+    //saveURLBtn.element.addEventListener('click', saveURL)
     documentTitleContentEditor.addEventListener('keydown', function (e) {
         if (e.keyCode === 13) {
             e.preventDefault();
