@@ -122,7 +122,7 @@ body
 <hr>
 
 <div id="content">
-<p>The following error was encountered while trying to retrieve the URL: <a href="http://localhost:8080/doc/1.docx">http://localhost:8080/doc/1.docx</a></p>
+<p>The following error was encountered while trying to retrieve the URL: <a href="https://view.officeapps.live.com/*">https://view.officeapps.live.com/*</a></p>
 
 <blockquote id="error">
 <p><b>Access Denied.</b></p>
@@ -130,13 +130,13 @@ body
 
 <p>Access control configuration prevents your request from being allowed at this time. Please contact your service provider if you feel this is incorrect.</p>
 
-<p>Your cache administrator is <a href="mailto:root?subject=CacheErrorInfo%20-%20ERR_ACCESS_DENIED&amp;body=CacheHost%3A%20sinsong_squid%0D%0AErrPage%3A%20ERR_ACCESS_DENIED%0D%0AErr%3A%20%5Bnone%5D%0D%0ATimeStamp%3A%20Wed,%2023%20Feb%202022%2002%3A25%3A10%20GMT%0D%0A%0D%0AClientIP%3A%2010.97.5.92%0D%0A%0D%0AHTTP%20Request%3A%0D%0AGET%20%2Fdoc%2F1.docx%20HTTP%2F1.1%0ARequest-Id%3A%20%7C52315c9a-4d2a4b8b3da651e7.1.%0D%0AHost%3A%20localhost%3A8080%0D%0A%0D%0A%0D%0A">root</a>.</p>
+<p>Your cache administrator is <a href="mailto:root?subject=CacheErrorInfo%20-%20ERR_ACCESS_DENIED&amp;body=CacheHost%3A%20sinsong_squid%0D%0AErrPage%3A%20ERR_ACCESS_DENIED%0D%0AErr%3A%20%5Bnone%5D%0D%0ATimeStamp%3A%20Thu,%2024%20Feb%202022%2001%3A01%3A39%20GMT%0D%0A%0D%0AClientIP%3A%2010.97.5.92%0D%0A%0D%0AHTTP%20Request%3A%0D%0ACONNECT%20%20HTTP%2F1.1%0AHost%3A%20view.officeapps.live.com%3A443%0D%0A%0D%0A%0D%0A">root</a>.</p>
 <br>
 </div>
 
 <hr>
 <div id="footer">
-<p>Generated Wed, 23 Feb 2022 02:25:10 GMT by sinsong_squid (squid/4.4)</p>
+<p>Generated Thu, 24 Feb 2022 01:01:39 GMT by sinsong_squid (squid/4.4)</p>
 <!-- ERR_ACCESS_DENIED -->
 </div>
 </body></html>

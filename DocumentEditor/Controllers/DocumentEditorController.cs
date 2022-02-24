@@ -48,18 +48,16 @@ namespace DocumentEditor.Controllers
         {
             try
             {
-                using (WebClient client = new WebClient())
-                {
-                    client.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
-                    client.Headers.Add(System.Net.HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134");
-                    byte[] data = client.DownloadData(param.fileUrl);
-                    MemoryStream stream = new MemoryStream(data);
-                    WordDocument document = WordDocument.Load(stream, FormatType.Docx);
-                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
-                    document.Dispose();
-                    stream.Dispose();
-                    return json;
-                }
+                Stream stream = null;
+                stream = GetDocumentFromURL(param.fileUrl).Result;
+
+                if (stream != null)
+                    stream.Position = 0;
+
+                WordDocument document = WordDocument.Load(stream, FormatType.Docx);
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                document.Dispose();
+                return json;
             }
             catch (Exception e)
             {
@@ -71,6 +69,19 @@ namespace DocumentEditor.Controllers
         {
             public string fileUrl { get; set; }
             public string Content { get; set; }
+        }
+        async Task<MemoryStream> GetDocumentFromURL(string url)
+        {
+            var client = new HttpClient(); ;
+            var response = await client.GetAsync(url);
+            var rawStream = await response.Content.ReadAsStreamAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                MemoryStream docStream = new MemoryStream();
+                rawStream.CopyTo(docStream);
+                return docStream;
+            }
+            else { return null; }
         }
 
         [AcceptVerbs("Post")]
@@ -268,5 +279,5 @@ namespace DocumentEditor.Controllers
         public string passwordBase64 { get; set; }
         public string saltBase64 { get; set; }
         public int spinCount { get; set; }
-    }
+    }    
 }
