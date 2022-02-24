@@ -48,6 +48,14 @@ namespace DocumentEditor.Controllers
         {
             try
             {
+                //byte[] bufferData = client.DownloadData(param.fileUrl);
+                //MemoryStream stream = new MemoryStream(bufferData);
+                //WordDocument document = WordDocument.Load(stream, FormatType.Docx);
+                //string json = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                //document.Dispose();
+                //stream.Dispose();
+                //return json;
+
                 Stream stream = null;
                 stream = GetDocumentFromURL(param.fileUrl).Result;
 
@@ -86,21 +94,109 @@ namespace DocumentEditor.Controllers
 
         [AcceptVerbs("Post")]
         [HttpPost]
-        [Route("saveURL")]
-        public FileStreamResult saveURL([FromBody] SaveParameter data)
+        [EnableCors("AllowAllOrigins")]
+        [Route("Save")]
+        public void Save([FromBody] SaveParameter data)
         {
+            string name = data.FileName;
+            string format = RetrieveFileType(name);
+            if (string.IsNullOrEmpty(name))
+            {
+                name = "Document1.doc";
+            }
             Stream document = WordDocument.Save(data.Content, FormatType.Docx);
-            FileStream file = new FileStream(data.FileName + FormatType.Docx, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            document.CopyTo(file);
-            file.Close();
+            FileStream fileStream = new FileStream(name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             document.Close();
-            return new FileStreamResult(new MemoryStream(), ".docx");
+            fileStream.Close();
+        }
+
+        private string RetrieveFileType(string name)
+        {
+            int index = name.LastIndexOf('.');
+            string format = index > -1 && index < name.Length - 1 ?
+                name.Substring(index) : ".doc";
+            return format;
         }
 
         public class SaveParameter
         {
             public string Content { get; set; }
             public string FileName { get; set; }
+        }
+
+        private FileStreamResult SaveDocument(WDocument document, string format, string fileName)
+        {
+            Stream stream = new MemoryStream();
+            string contentType = "";
+            if (format == ".pdf")
+            {
+                contentType = "application/pdf";
+            }
+            else
+            {
+                WFormatType type = GetWFormatType(format);
+                switch (type)
+                {
+                    case WFormatType.Rtf:
+                        contentType = "application/rtf";
+                        break;
+                    case WFormatType.WordML:
+                        contentType = "application/xml";
+                        break;
+                    case WFormatType.Html:
+                        contentType = "application/html";
+                        break;
+                    case WFormatType.Dotx:
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
+                        break;
+                    case WFormatType.Doc:
+                        contentType = "application/msword";
+                        break;
+                    case WFormatType.Dot:
+                        contentType = "application/msword";
+                        break;
+                }
+                document.Save(stream, type);
+            }
+            document.Close();
+            stream.Position = 0;
+            return new FileStreamResult(stream, contentType)
+            {
+                FileDownloadName = fileName
+            };
+        }
+
+        internal static WFormatType GetWFormatType(string format)
+        {
+            if (string.IsNullOrEmpty(format))
+                throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
+            switch (format.ToLower())
+            {
+                case ".dotx":
+                    return WFormatType.Dotx;
+                case ".docx":
+                    return WFormatType.Docx;
+                case ".docm":
+                    return WFormatType.Docm;
+                case ".dotm":
+                    return WFormatType.Dotm;
+                case ".dot":
+                    return WFormatType.Dot;
+                case ".doc":
+                    return WFormatType.Doc;
+                case ".rtf":
+                    return WFormatType.Rtf;
+                case ".html":
+                    return WFormatType.Html;
+                case ".txt":
+                    return WFormatType.Txt;
+                case ".xml":
+                    return WFormatType.WordML;
+                case ".odt":
+                    return WFormatType.Odt;
+                default:
+                    throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
+            }
         }
 
         [AcceptVerbs("Post")]
@@ -233,6 +329,7 @@ namespace DocumentEditor.Controllers
                 case "docx":
                 case "docm":
                 case "dotm":
+
                     return FormatType.Docx;
                 case "dot":
                 case "doc":

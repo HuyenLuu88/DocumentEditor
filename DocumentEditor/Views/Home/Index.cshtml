@@ -79,5 +79,36 @@
         };
         titleBarDiv = document.getElementById('documenteditor_titlebar');
         initComponentAndWireEvent();
+
+        documenteditor.keyDown = function (e) {            
+            if (e.event.key == 's' && e.event.ctrlKey == true) {
+                e.isHandled = true;
+                e.event.preventDefault();
+
+                var formData = new FormData();
+                formData.append('FileName', 'sample.docx');
+                formData.append('Content', documenteditor);
+                saveAsRtf(formData);
+            }
+
+            function saveAsRtf(formData) {
+                var httpRequest = new XMLHttpRequest();
+                httpRequest.open('POST', '/api/DocumentEditor/Save', true);
+                httpRequest.onreadystatechange = function () {
+                    if (httpRequest.readyState === 4) {
+                        if (httpRequest.status === 200 || httpRequest.status === 304) {
+                            console.log("Result:", httpRequest.responseText)
+                        } else {
+                            console.error(httpRequest.response);
+                        }
+                    }
+                }
+                httpRequest.responseType = 'blob';
+                httpRequest.send(formData);
+            }
+
+        }
+
+
     });
 </script>
