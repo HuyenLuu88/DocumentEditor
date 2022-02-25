@@ -14,6 +14,7 @@ using System.Net.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using System.Net.Http.Headers;
 using System.Security.Policy;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DocumentEditor.Controllers
 {
@@ -56,8 +57,7 @@ namespace DocumentEditor.Controllers
                 //stream.Dispose();
                 //return json;
 
-                Stream stream = null;
-                stream = GetDocumentFromURL(param.fileUrl).Result;
+                Stream stream = GetDocumentFromURL(param.fileUrl).Result;
 
                 if (stream != null)
                     stream.Position = 0;
@@ -94,20 +94,38 @@ namespace DocumentEditor.Controllers
 
         [AcceptVerbs("Post")]
         [HttpPost]
-        [EnableCors("AllowAllOrigins")]
         [Route("Save")]
         public void Save([FromBody] SaveParameter data)
         {
-            string name = data.FileName;
-            string format = RetrieveFileType(name);
+            string name = data.FileName + '.' + FormatType.Docx;
             if (string.IsNullOrEmpty(name))
             {
                 name = "Document1.doc";
             }
-            Stream document = WordDocument.Save(data.Content, FormatType.Docx);
-            FileStream fileStream = new FileStream(name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            document.Close();
-            fileStream.Close();
+
+            try
+            {
+                Stream document = WordDocument.Save(data.Content, FormatType.Docx);
+                FileStream fileStream = new FileStream(name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                document.CopyTo(fileStream);
+                document.Close();
+                fileStream.Close();
+                Console.WriteLine(document);
+                Console.WriteLine(fileStream);
+
+                string serverPath = data.FileUrl;
+                if (!System.IO.Directory.Exists(serverPath))
+                    System.IO.Directory.CreateDirectory(serverPath);
+
+                using (WebClient client = new WebClient())
+                {
+                    client.UploadData(serverPath, ((MemoryStream)document).ToArray());
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private string RetrieveFileType(string name)
@@ -122,6 +140,7 @@ namespace DocumentEditor.Controllers
         {
             public string Content { get; set; }
             public string FileName { get; set; }
+            public string FileUrl { get; set; }
         }
 
         private FileStreamResult SaveDocument(WDocument document, string format, string fileName)

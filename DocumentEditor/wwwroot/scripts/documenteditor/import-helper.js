@@ -187,10 +187,6 @@ function openURL() {
         }
     };
     http.send(JSON.stringify(content));
-
-    documentContainer.addEventListener('keydown', function () {
-        console.log("Eksd") 
-    })
 }
 function saveURL() {
     var documentContainer = document.getElementById("container").ej2_instances[0];
